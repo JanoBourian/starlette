@@ -1,7 +1,22 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.responses import JSONResponse, PlainTextResponse, Response
+from starlette.requests import Request
 from starlette.routing import Route, Mount, WebSocketRoute
 from starlette.staticfiles import StaticFiles
+from starlette.convertors import Convertor, register_url_convertor
+from datetime import datetime
+import json 
+
+class DateTimeConvertor(Convertor):
+    regex = "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?"
+
+    def convert(self, value: str) -> datetime:
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
+
+    def to_string(self, value: datetime) -> str:
+        return value.strftime("%Y-%m-%dT%H:%M:%S")
+
+register_url_convertor("datetime", DateTimeConvertor())
 
 async def homepage(request):
     print(f"REQUEST: {request}")
@@ -21,6 +36,16 @@ async def websocket_endpoint(websocket):
     await websocket.send_text('Hello, websocket!')
     await websocket.close()
 
+async def get_path(request: Request):
+    path_str = request.path_params.get("rest_of_path")
+    print(request.path_params)
+    return JSONResponse({"path": path_str})
+
+async def get_time(request:Request):
+    history = request.path_params.get("date", None)
+    print(request.path_params)
+    return JSONResponse({"history": str(history)})
+
 def startup():
     print("Ready to go!")
 
@@ -28,6 +53,8 @@ routes = [
         Route("/", homepage),
         Route("/user/me", user_me),
         Route("/user/{username}", user),
+        Route("/path/{rest_of_path:path}", get_path),
+        Route("/history/{date:datetime}", get_time),
         WebSocketRoute('/ws', websocket_endpoint),
         Mount('/static', StaticFiles(directory="static")),
     ]
