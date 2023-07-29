@@ -46,6 +46,16 @@ async def get_time(request:Request):
     print(request.path_params)
     return JSONResponse({"history": str(history)})
 
+async def get_info(request):
+    print(dir(request))
+    if request.method == "GET":
+        content = json.dumps({"user": "user"})
+        return Response(content=content, status_code=400)
+    elif request.method == "POST":
+        return JSONResponse({"item": "item was added!"})
+    else:
+        return JSONResponse({"error": "Invalid method or invalid operation!"})
+
 def startup():
     print("Ready to go!")
 
@@ -57,6 +67,9 @@ routes = [
         Route("/history/{date:datetime}", get_time),
         WebSocketRoute('/ws', websocket_endpoint),
         Mount('/static', StaticFiles(directory="static")),
+        Mount('/information', routes = [
+            Route("/user", get_info, methods = ["GET", "POST"]),
+        ])
     ]
 
 app = Starlette(
