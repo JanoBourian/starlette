@@ -8,6 +8,7 @@ from datetime import datetime
 import json
 from accounts import accounts
 from home import home
+from wbsockets import wbsockets
 
 class DateTimeConvertor(Convertor):
     regex = "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?"
@@ -89,6 +90,7 @@ routes = [
     ),
     Mount("/accounts", routes=accounts.routes),
     Mount("/home", routes = home.routes),
+    Mount("/websockets", routes  = wbsockets.routes),
 ]
 
 app = Starlette(debug=True, routes=routes, on_startup=[startup])
