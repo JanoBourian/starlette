@@ -2,6 +2,7 @@ from starlette.requests import Request
 from starlette.endpoints import HTTPEndpoint, WebSocketEndpoint
 from starlette.responses import HTMLResponse
 from starlette.routing import Route, WebSocketRoute
+import time
 
 html = """
 <!DOCTYPE html>
@@ -46,6 +47,8 @@ class Echo(WebSocketEndpoint):
     encoding = "text"
 
     async def on_receive(self, websocket, data):
+        await websocket.send_text("Response")
+        time.sleep(4)
         await websocket.send_text(f"Message text was: {data}")
         
 routes = [
