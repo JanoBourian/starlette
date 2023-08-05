@@ -41,6 +41,7 @@ html = """
 class Chatpage(HTTPEndpoint):
     
     async def get(self, request: Request):
+        print(request)
         return HTMLResponse(html)
 
 class Echo(WebSocketEndpoint):
@@ -48,7 +49,6 @@ class Echo(WebSocketEndpoint):
 
     async def on_receive(self, websocket, data):
         await websocket.send_text("Response")
-        time.sleep(4)
         await websocket.send_text(f"Message text was: {data}")
         
 routes = [
