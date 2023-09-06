@@ -27,6 +27,9 @@ register_url_convertor("datetime", DateTimeConvertor())
 
 async def homepage(request):
     print(f"REQUEST: {request}")
+    print(f"REQUEST INFORMATION: {dir(request)}")
+    print(f"HEADERS: {request.headers}")
+    print(f"QUERY PARAMS: {request.query_params}")
     return JSONResponse({"hello": "world"})
 
 
