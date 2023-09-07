@@ -11,6 +11,7 @@ from home import home
 from wbsockets import wbsockets
 from chat import chat 
 from public import public
+from example import example
 
 class DateTimeConvertor(Convertor):
     regex = "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?"
@@ -30,6 +31,8 @@ async def homepage(request):
     print(f"REQUEST INFORMATION: {dir(request)}")
     print(f"HEADERS: {request.headers}")
     print(f"QUERY PARAMS: {request.query_params}")
+    print(f"REQUEST.APP: {request.app}")
+    print(f"REQUEST.APP INFORMATION: {dir(request.app)}")
     return JSONResponse({"hello": "world"})
 
 
@@ -97,7 +100,8 @@ routes = [
     Mount("/home", routes = home.routes),
     Mount("/websockets", routes  = wbsockets.routes),
     Mount("/chat", routes = chat.routes),
-    Mount("/index", routes= public.routes)
+    Mount("/index", routes= public.routes),
+    Mount("/example", routes = example.routes)
 ]
 
 app = Starlette(debug=True, routes=routes, on_startup=[startup])
