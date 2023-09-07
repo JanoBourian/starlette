@@ -38,11 +38,12 @@ html = """
 </html>
 """
 
+
 class Chatpage(HTTPEndpoint):
-    
     async def get(self, request: Request):
         print(request)
         return HTMLResponse(html)
+
 
 class Echo(WebSocketEndpoint):
     encoding = "text"
@@ -50,8 +51,6 @@ class Echo(WebSocketEndpoint):
     async def on_receive(self, websocket, data):
         await websocket.send_text("Response")
         await websocket.send_text(f"Message text was: {data}")
-        
-routes = [
-    Route("/", Chatpage),
-    WebSocketRoute("/ws", Echo)
-]
+
+
+routes = [Route("/", Chatpage), WebSocketRoute("/ws", Echo)]

@@ -3,11 +3,12 @@ from starlette.responses import JSONResponse, Response
 from starlette.routing import Route, WebSocketRoute
 from starlette.endpoints import HTTPEndpoint, WebSocketEndpoint
 from starlette.websockets import WebSocket
-import logging 
+import logging
+
 
 class WbSocketCommunication(WebSocketEndpoint):
     encoding = "bytes"
-    
+
     async def on_connect(self, websocket: WebSocket):
         await websocket.accept()
 
@@ -20,8 +21,6 @@ class WbSocketCommunication(WebSocketEndpoint):
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int):
         logging.warning(f"Disconnected: {websocket}")
-    
 
-routes = [
-    WebSocketRoute("/", WbSocketCommunication)
-]
+
+routes = [WebSocketRoute("/", WbSocketCommunication)]
