@@ -7,6 +7,12 @@ async def example_get(request):
     print(f"ITEM INFORMATION: {dir(items_app)}")
     print(f"ITEM TYPE: {type(items_app)}")
     return JSONResponse({"message": "Hello form example_get"})
+ 
+async def example_post(request):
+    body = await request.body()
+    print(f"REQUEST BODY: {body}")
+    print(f"REQUEST TYPE: {type(body)}")
+    return JSONResponse({"message": "Hello form example_post"})
 
 async def wsconnection(websocket):
     print(f"WEBSOCKET INFORMATION: {dir(websocket)}")
@@ -22,7 +28,8 @@ async def request_query_params(request):
     return JSONResponse({"class_name": class_name, "query_params": query_params})
 
 routes = [
-    Route("/", example_get),
+    Route("/", example_get, methods = ["GET"]),
+    Route("/", example_post, methods = ["POST"]),
     Route("/class/{classname}", request_query_params),
     WebSocketRoute("/ws", wsconnection)
 ]
