@@ -7,6 +7,7 @@ from starlette.convertors import Convertor, register_url_convertor
 from datetime import datetime
 import json
 from accounts import accounts
+from application import application
 from home import home
 from wbsockets import wbsockets
 from chat import chat
@@ -103,6 +104,7 @@ routes = [
     Mount("/chat", routes=chat.routes),
     Mount("/index", routes=public.routes),
     Mount("/example", routes=example.routes),
+    Mount("/application", routes = application.routes),
 ]
 
-app = Starlette(debug=True, routes=routes, on_startup=[startup])
+app = Starlette(debug=False, routes=routes, on_startup=[startup])
