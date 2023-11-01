@@ -1,5 +1,5 @@
 from starlette.applications import Starlette
-from starlette.responses import PlainTextResponse, JSONResponse
+from starlette.responses import PlainTextResponse, JSONResponse, StreamingResponse
 from starlette.requests import Request
 from starlette.routing import Route, Mount
 import json
@@ -43,9 +43,16 @@ async def keychain(request: Request) -> JSONResponse:
     print(body.get("key"))
     return JSONResponse(body)
 
+async def fake_video_streamer():
+    for _ in range(1000):
+        yield b"some fake video bytes\n"
+
+async def get_video(request: Request) -> StreamingResponse:
+    return StreamingResponse(fake_video_streamer())
 
 routes = [
     Route("/", application),
     Route("/dummy", dummy, methods=["POST"]),
+    Route("/video", get_video ),
     Route("/keychain", keychain, methods=["POST"]),
 ]
