@@ -4,6 +4,7 @@ from starlette.requests import Request
 from starlette.routing import Route, Mount
 import json
 import time
+import asyncio 
 
 
 async def application(request: Request) -> JSONResponse:
@@ -44,8 +45,9 @@ async def keychain(request: Request) -> JSONResponse:
     return JSONResponse(body)
 
 async def fake_video_streamer():
-    for _ in range(1000):
-        yield b"some fake video bytes\n"
+    for _ in range(10):
+        yield b"some fake video bytes"
+        await asyncio.sleep(1)
 
 async def get_video(request: Request) -> StreamingResponse:
     return StreamingResponse(fake_video_streamer())
