@@ -34,17 +34,19 @@ async def request_query_params(request):
         {"class_name": class_name, "query_params": query_params}, status_code=200
     )
 
+
 async def slow_numbers(minimum, maximum):
-    yield '<html><body><ul>'
+    yield "<html><body><ul>"
     for number in range(minimum, maximum + 1):
-        yield '<li>%d</li>' % number
+        yield "<li>%d</li>" % number
         await asyncio.sleep(0.5)
-    yield '</ul></body></html>'
+    yield "</ul></body></html>"
+
 
 async def example_response(request):
     generator = slow_numbers(1, 10)
     return StreamingResponse(generator)
-   
+
 
 routes = [
     Route("/", example_get, methods=["GET"]),

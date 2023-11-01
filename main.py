@@ -104,7 +104,7 @@ routes = [
     Mount("/chat", routes=chat.routes),
     Mount("/index", routes=public.routes),
     Mount("/example", routes=example.routes),
-    Mount("/application", routes = application.routes),
+    Mount("/application", routes=application.routes),
 ]
 
 app = Starlette(debug=False, routes=routes, on_startup=[startup])
