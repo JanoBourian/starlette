@@ -13,6 +13,44 @@ from wbsockets import wbsockets
 from chat import chat
 from public import public
 from example import example
+from current_sources import current_sources
+
+## Configuration for database connection
+import contextlib
+import databases
+import sqlalchemy
+from starlette.config import Config
+
+config = Config(".env")
+DATABASE_URL = config("DATABASE_URL")
+
+# Database table definitions.
+metadata = sqlalchemy.MetaData()
+
+sources = sqlalchemy.Table(
+    "sources",
+    metadata,
+    sqlalchemy.Column("uuid", sqlalchemy.Integer, primary_key=True),
+    sqlalchemy.Column("name", sqlalchemy.String),
+    sqlalchemy.Column("current_amount", sqlalchemy.Float),
+    sqlalchemy.Column("image", sqlalchemy.LargeBinary),
+    sqlalchemy.Column("is_active", sqlalchemy.Boolean),
+    sqlalchemy.Column("created_at", sqlalchemy.DateTime),
+    sqlalchemy.Column("modified_at", sqlalchemy.DateTime),
+    sqlalchemy.Column("deleted_at", sqlalchemy.DateTime),
+)
+
+database = databases.Database(DATABASE_URL)
+
+engine = sqlalchemy.create_engine(DATABASE_URL)
+metadata.create_all(engine)
+
+
+@contextlib.asynccontextmanager
+async def lifespan(app):
+    await database.connect()
+    yield
+    await database.disconnect()
 
 
 class DateTimeConvertor(Convertor):
@@ -105,6 +143,11 @@ routes = [
     Mount("/index", routes=public.routes),
     Mount("/example", routes=example.routes),
     Mount("/application", routes=application.routes),
+    Mount("/current_sources", routes=current_sources.routes),
 ]
 
-app = Starlette(debug=False, routes=routes, on_startup=[startup])
+app = Starlette(
+    debug=False,
+    routes=routes,
+    lifespan=lifespan,
+)  # on_startup=[startup], lifespan=lifespan,)
