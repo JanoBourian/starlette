@@ -14,6 +14,7 @@ from chat import chat
 from public import public
 from example import example
 from current_sources import current_sources
+from current_inputs import current_inputs
 
 ## Configuration for database connection
 import contextlib
@@ -144,6 +145,7 @@ routes = [
     Mount("/example", routes=example.routes),
     Mount("/application", routes=application.routes),
     Mount("/current_sources", routes=current_sources.routes),
+    Mount("/current_inputs", routes = current_inputs.routes),
 ]
 
 app = Starlette(
