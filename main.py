@@ -145,7 +145,7 @@ routes = [
     Mount("/example", routes=example.routes),
     Mount("/application", routes=application.routes),
     Mount("/current_sources", routes=current_sources.routes),
-    Mount("/current_inputs", routes = current_inputs.routes),
+    Mount("/current_inputs", routes=current_inputs.routes),
 ]
 
 app = Starlette(
