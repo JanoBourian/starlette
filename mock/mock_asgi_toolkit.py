@@ -1,5 +1,6 @@
 from starlette.responses import PlainTextResponse
 
+
 async def app(scope, receive, send):
     assert scope["type"] == "http"
     print(f"SCOPE: {scope}")
