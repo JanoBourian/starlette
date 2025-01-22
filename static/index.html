@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SofIA Chatbot</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      position: relative;
+    }
+    .chatbot-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 350px;
+      height: 500px;
+      border: 1px solid #dee2e6;
+      border-radius: 0.5rem;
+      background-color: #ffffff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+    }
+    .chat-header {
+      background-color: #6600A1;
+      color: #ffffff;
+      padding: 10px 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-header .close-btn {
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .chat-message {
+      margin-bottom: 15px;
+    }
+    .user-message {
+      text-align: right;
+    }
+    .user-message .message-text {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      display: inline-block;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .bot-message .message-text {
+      background-color: #e2e3e5;
+      color: #383d41;
+      display: inline-block;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .waiting-dots {
+      font-style: italic;
+      color: #6c757d;
+    }
+    .chat-footer {
+      display: flex;
+      padding: 10px 20px;
+      border-top: 1px solid #dee2e6;
+    }
+    .chat-footer input {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+    .chatbot-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #6600A1;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .custom-btn {
+      background-color: #6600A1;
+      color: #ffffff;
+      border: none;
+    }
+    
+    .custom-btn:hover {
+      background-color: #4b0077;
+      color: #ffffff;
+    }
+    
+    .custom-btn:disabled {
+      background-color: #9d73c9;
+      color: #ffffff;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <button class="chatbot-toggle" id="chatbotToggle">💬</button>
+
+  <div class="chatbot-container" id="chatbotContainer">
+    <div class="chat-header">
+      SofIA by Vector
+      <span class="close-btn" id="closeChatbot">&times;</span>
+    </div>
+    <div class="chat-body" id="chatBody">
+    </div>
+    <div class="chat-footer">
+      <input type="text" id="userInput" class="form-control" placeholder="Escribe tu pregunta..." disabled>
+      <button class="btn custom-btn" id="sendButton" disabled>Enviar</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/uuid/dist/umd/uuidv4.min.js"></script>
+  <script>
+    const chatbotContainer = document.getElementById('chatbotContainer');
+    const chatbotToggle = document.getElementById('chatbotToggle');
+    const closeChatbot = document.getElementById('closeChatbot');
+    const chatBody = document.getElementById('chatBody');
+    const userInput = document.getElementById('userInput');
+    const sendButton = document.getElementById('sendButton');
+
+    let websocket;
+
+    chatbotToggle.addEventListener('click', () => {
+      chatbotContainer.style.display = 'flex';
+      chatbotToggle.style.display = 'none';
+      initializeWebSocket();
+    });
+
+    closeChatbot.addEventListener('click', () => {
+      chatbotContainer.style.display = 'none';
+      chatbotToggle.style.display = 'flex';
+      if (websocket) {
+        websocket.close();
+      }
+    });
+
+    function initializeWebSocket() {
+      websocket = new WebSocket(`ws://${window.location.host}/ws`);
+
+      websocket.onopen = () => {
+        console.log('WebSocket connection established');
+        enableChatInput(true);
+      };
+
+      websocket.onmessage = (event) => {
+        console.log('Received message from WebSocket:', event.data);
+        appendMessage('bot', event.data, false, true);
+        enableChatInput(true);
+      };
+
+      websocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        appendMessage('bot', 'Ocurrió un error en la comunicación.', false, true);
+        enableChatInput(false);
+      };
+
+      websocket.onclose = () => {
+        console.log('WebSocket connection closed');
+        enableChatInput(false);
+      };
+    }
+
+    function enableChatInput(enabled) {
+      userInput.disabled = !enabled;
+      sendButton.disabled = !enabled;
+    }
+
+    function appendMessage(sender, message, isWaiting = false, wordByWord = false, callback = null) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('chat-message', sender === 'user' ? 'user-message' : 'bot-message');
+      const messageTextDiv = document.createElement('div');
+      messageTextDiv.classList.add('message-text');
+      if (isWaiting) {
+        messageTextDiv.textContent = '...';
+      } else if (!wordByWord) {
+        messageTextDiv.textContent = message;
+      }
+      messageDiv.appendChild(messageTextDiv);
+      chatBody.appendChild(messageDiv);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      if (wordByWord) {
+        let words = message.split(' ');
+        let currentIndex = 0;
+
+        const interval = setInterval(() => {
+          if (currentIndex < words.length) {
+            messageTextDiv.textContent += (currentIndex > 0 ? ' ' : '') + words[currentIndex];
+            chatBody.scrollTop = chatBody.scrollHeight;
+            currentIndex++;
+          } else {
+            clearInterval(interval);
+            if (callback) callback();
+          }
+        }, 150);
+      }
+    }
+
+    function handleUserInput() {
+      const question = userInput.value.trim();
+      if (question && websocket && websocket.readyState === WebSocket.OPEN) {
+        appendMessage('user', question);
+        userInput.value = '';
+        enableChatInput(false);
+        websocket.send(question);
+      }
+    }
+
+    sendButton.addEventListener('click', handleUserInput);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleUserInput();
+      }
+    });
+  </script>
+</body>
+</html>
